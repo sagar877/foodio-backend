@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -53,8 +54,15 @@ class AuthController extends Controller
                 ], 401);
             }
 
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                return response()->json(['error' => 'Invalid credentials'], 401);
+            }
+
+            Auth::login($user);
+            
             return response()->json([
-                'message' => 'Login successful'
+                'message' => 'Login successful',
+                'user' => $user,
             ], 200);
         }
         catch (\Exception $e) {
