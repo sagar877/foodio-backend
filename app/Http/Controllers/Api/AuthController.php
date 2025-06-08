@@ -24,11 +24,15 @@ class AuthController extends Controller
                 'email' => $request->email,
                 'password' => Hash::make($request->password),
                 'email_verified_at' => now(),
-                'remember_token' => Str::random(10),
             ]);
+
+            $user = User::where('email', $request->email)->first();
+
+            Auth::login($user);
 
             return response()->json([
                 'message' => 'User registered successfully',
+                'user' => $user,
             ], 201);
         }
         catch (\Exception $e) {
@@ -59,7 +63,7 @@ class AuthController extends Controller
             }
 
             Auth::login($user);
-            
+
             return response()->json([
                 'message' => 'Login successful',
                 'user' => $user,
@@ -68,6 +72,28 @@ class AuthController extends Controller
         catch (\Exception $e) {
             return response()->json([
                 'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    public function destroy(Request $request)
+    {
+        try {
+
+            if (Auth::guard('web')->check()) {
+                Auth::guard('web')->logout();
+                $request->session()->invalidate();
+                $request->session()->regenerateToken();
+            }
+
+            return response()->json([
+                'message' => 'Logout successful',
+            ], 200);
+
+        } catch (\Exception $e) {
+            \Log::error('Logout failed: ' . $e->getMessage());
+            return response()->json([
+                'error' => 'Logout failed',
             ], 500);
         }
     }

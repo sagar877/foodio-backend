@@ -6,8 +6,20 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function index()
+    public function getUser()
     {
-        return response()->json(User::all());
+        try {
+            $user = User::find(auth()->user()?->id);
+
+            if (!$user) {
+                return response()->json(['message' => null], 401);
+            }
+
+            return response()->json([
+                'user' => $user,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
     }
 }
