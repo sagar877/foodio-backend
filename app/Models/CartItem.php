@@ -12,11 +12,9 @@ class CartItem extends Model
      *
      * @var list<string>
      */
-    protected $fillable = [
-        'user_id',
-        'product_id',
-        'quantity',
-    ];
+    
+
+    protected $gaurded = ['id'];
 
     /**
      * Get the user that owns the cart item.

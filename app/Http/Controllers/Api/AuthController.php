@@ -42,6 +42,22 @@ class AuthController extends Controller
         }
     }
 
+    public function checkAuthenticated(Request $request)
+    {
+        try {
+            if (Auth::check()) {
+                return response()->json([
+                    'authenticated' => true,
+                    'user' => Auth::user(),
+                ], 200);
+            } else {
+                return response()->json(['authenticated' => false], 401);
+            }
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+
     public function login(Request $request)
     {
         try {
@@ -79,12 +95,11 @@ class AuthController extends Controller
     public function destroy(Request $request)
     {
         try {
+            Auth::guard('web')->logout();
 
-            if (Auth::guard('web')->check()) {
-                Auth::guard('web')->logout();
-                $request->session()->invalidate();
-                $request->session()->regenerateToken();
-            }
+            $request->session()->invalidate();
+            
+            $request->session()->regenerateToken();
 
             return response()->json([
                 'message' => 'Logout successful',
